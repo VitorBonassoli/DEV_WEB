@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: minha-app
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+# O professor pode subir a imagem de teste dele nesta mesma rede
+# e apontar as requisições para http://app:8000
+networks:
+  app-network:
+    driver: bridge
