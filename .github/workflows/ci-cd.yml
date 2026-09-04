@@ -35,7 +35,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build da imagem Docker
-        run: docker build -t minha-app:${{ github.sha }} -o type=docker,dest=/tmp/minha-app.tar .
+        run: |
+          docker build -t minha-app:${{ github.sha }} .
+          docker save -o /tmp/minha-app.tar minha-app:${{ github.sha }}
 
       - name: Copiar imagem para a VM
         uses: appleboy/scp-action@v0.1.7
