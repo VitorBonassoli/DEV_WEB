@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>web-mob · painel</title>
+<style>
+  :root {
+    --bg: #101826;
+    --panel: #17233a;
+    --panel-border: #263654;
+    --text: #e7ecf5;
+    --muted: #8695b3;
+    --accent: #e8a33d;
+    --accent-dim: #b9822f;
+    --ok: #5fd08a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    padding: 64px 24px;
+  }
+  main {
+    width: 100%;
+    max-width: 620px;
+  }
+  .kicker {
+    color: var(--accent);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.55;
+    margin: 0 0 40px 0;
+    max-width: 46ch;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background 0.3s ease;
+  }
+  .dot.up { background: var(--ok); box-shadow: 0 0 0 4px rgba(95, 208, 138, 0.15); }
+  .dot.down { background: #e5686b; box-shadow: 0 0 0 4px rgba(229, 104, 107, 0.15); }
+  .status-label { font-size: 15px; font-weight: 500; }
+  .status-sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .status-time { color: var(--muted); font-size: 13px; }
+
+  .panel h2 {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 0 0 18px 0;
+  }
+  .calc-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  input[type="number"] {
+    background: var(--bg);
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+    width: 84px;
+    outline: none;
+  }
+  input[type="number"]:focus {
+    border-color: var(--accent-dim);
+  }
+  .op {
+    color: var(--muted);
+    font-size: 18px;
+  }
+  button {
+    background: var(--accent);
+    color: #17130a;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button:hover { background: #f0ae52; }
+  button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  .result {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--panel-border);
+    display: none;
+  }
+  .result.show { display: block; }
+  .result-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .result-note {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .routes {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 2;
+  }
+  .routes code {
+    background: var(--bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--text);
+    font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">web-mob</div>
+  <h1>Uma API pequena, rodando de verdade.</h1>
+  <p class="lede">Empacotada com Docker, testada a cada commit e publicada automaticamente numa VM na nuvem.</p>
+
+  <div class="panel">
+    <div class="status-row">
+      <div class="status-left">
+        <div class="dot" id="statusDot"></div>
+        <div>
+          <div class="status-label" id="statusLabel">Verificando status…</div>
+          <div class="status-sub">GET /health</div>
+        </div>
+      </div>
+      <div class="status-time" id="statusTime"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Testar o endpoint de soma</h2>
+    <div class="calc-row">
+      <input type="number" id="a" value="4" aria-label="Primeiro número">
+      <span class="op">+</span>
+      <input type="number" id="b" value="6" aria-label="Segundo número">
+      <button id="calcBtn">Calcular</button>
+    </div>
+    <div class="result" id="result">
+      <div class="result-value" id="resultValue"></div>
+      <div class="result-note" id="resultNote"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Rotas disponíveis</h2>
+    <div class="routes">
+      <div><code>GET /</code> — esta página</div>
+      <div><code>GET /health</code> — status da aplicação</div>
+      <div><code>GET /soma/&lt;a&gt;/&lt;b&gt;</code> — soma dois números</div>
+    </div>
+  </div>
+</main>
+
+<script>
+  function checkHealth() {
+    const dot = document.getElementById('statusDot');
+    const label = document.getElementById('statusLabel');
+    const time = document.getElementById('statusTime');
+    fetch('/health')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(() => {
+        dot.className = 'dot up';
+        label.textContent = 'No ar';
+        time.textContent = new Date().toLocaleTimeString('pt-BR');
+      })
+      .catch(() => {
+        dot.className = 'dot down';
+        label.textContent = 'Sem resposta';
+        time.textContent = new Date().toLocaleTimeString('pt-BR');
+      });
+  }
+  checkHealth();
+  setInterval(checkHealth, 15000);
+
+  document.getElementById('calcBtn').addEventListener('click', () => {
+    const a = document.getElementById('a').value || 0;
+    const b = document.getElementById('b').value || 0;
+    fetch(`/soma/${a}/${b}`)
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('resultValue').textContent = data.resultado;
+        document.getElementById('resultNote').textContent = `${a} + ${b} = ${data.resultado}, calculado no servidor`;
+        document.getElementById('result').classList.add('show');
+      });
+  });
+</script>
+</body>
+</html>
