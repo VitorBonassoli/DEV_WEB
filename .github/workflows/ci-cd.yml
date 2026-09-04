@@ -45,8 +45,8 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: "/tmp/minha-app.tar"
-          target: "/tmp"
+          source: "minha-app.tar"
+          target: "/tmp""
 
       - name: Carregar imagem e subir container na VM
         uses: appleboy/ssh-action@v1.2.0
